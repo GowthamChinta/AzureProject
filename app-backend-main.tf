@@ -8,8 +8,8 @@ resource "azurerm_network_security_group" "backend-linux-vm-nsg" {
   resource_group_name = azurerm_resource_group.network-rg.name
 
   security_rule {
-    name                       = "allow-http"
-    description                = "allow-http"
+    name                       = "allow-ingress-frontend"
+    description                = "allow-ingress-frontend"
     priority                   = 110
     direction                  = "Inbound"
     access                     = "Allow"
@@ -17,7 +17,7 @@ resource "azurerm_network_security_group" "backend-linux-vm-nsg" {
     source_port_range          = "*"
     destination_port_range     = "80"
     source_address_prefix      = azurerm_linux_virtual_machine.frontend-linux-vm.private_ip_address
-    destination_address_prefix = "*"
+    destination_address_prefix = azurerm_linux_virtual_machine.backend-linux-vm.private_ip_address
   }
     security_rule {
     name                       = "bastion-ssh"
@@ -105,7 +105,7 @@ resource "azurerm_linux_virtual_machine" "backend-linux-vm" {
   computer_name = "linux-backend-vm"
   admin_username = var.web-linux-admin-username
   admin_password = var.web-linux-admin-password
-  custom_data = base64encode(data.template_file.linux-vm-cloud-init.rendered)
+  custom_data = base64encode(data.template_file.linux-vm-backend-init.rendered)
   disable_password_authentication = false
   tags = {
     application = var.app_name
